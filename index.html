@@ -39,7 +39,7 @@
     <header class="relative py-12 px-4 sm:px-6 bg-slate-900/50 border-b border-slate-800">
         <div class="max-w-7xl mx-auto text-center">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold uppercase mb-4">
-                جدول تمارين  — Push / Pull / Leg / Upper / Lower
+                جدول تمارين — Chest / Back / Shoulder / Arm / Leg
             </div>
            
             
@@ -88,6 +88,17 @@
                 <div class="flex flex-wrap gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800" id="day-tabs"></div>
             </div>
 
+            <!-- Day progress -->
+            <div id="day-progress" class="mb-4 hidden">
+                <div class="flex justify-between text-xs text-slate-400 mb-1">
+                    <span id="day-progress-text"></span>
+                    <span id="day-progress-pct"></span>
+                </div>
+                <div class="h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="day-progress-bar" class="h-full bg-red-500 rounded-full transition-all duration-300" style="width:0%"></div>
+                </div>
+            </div>
+
             <!-- Exercises Container -->
             <div id="schedule-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </section>
@@ -115,12 +126,25 @@
         <p>&copy; 2026 AAA Gym Schedule. جميع الحقوق محفوظة.</p>
     </footer>
 
+    <!-- Rest Timer -->
+    <div id="rest-timer" class="fixed bottom-5 right-5 z-[110] glass border border-slate-700 rounded-2xl shadow-2xl">
+        <button onclick="toggleTimerPanel()" class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white">
+            <i class="fa-solid fa-stopwatch text-red-500"></i>
+            <span id="timer-display">مؤقت الراحة</span>
+        </button>
+        <div id="timer-panel" class="hidden px-3 pb-3 flex gap-2">
+            <button onclick="startTimer(60)" class="bg-slate-800 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">60ث</button>
+            <button onclick="startTimer(90)" class="bg-slate-800 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">90ث</button>
+            <button onclick="startTimer(120)" class="bg-slate-800 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">120ث</button>
+            <button onclick="stopTimer()" class="bg-slate-800 hover:bg-slate-600 text-slate-300 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast" class="toast fixed bottom-5 left-5 z-[110] bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow-2xl"></div>
 
     <script>
-        // Beginner-friendly Push / Pull / Leg / Upper / Lower split.
-        // Saturday=Push, Sunday=Pull, Monday=Leg, Tuesday=Rest, Wednesday=Upper, Thursday=Lower, Friday=Rest
+        // Body-part split: Saturday=Chest, Sunday=Back, Monday=Shoulder, Tuesday=Rest, Wednesday=Arm, Thursday=Leg, Friday=Rest
         // Self-contained exercise diagrams (start/finish posture) — no external images,
         // so they always render, drawn to visually explain correct form for beginners.
         const S = 5.5; // stroke width for the body
@@ -285,365 +309,4 @@
                 <path d="M32 66 L92 76" stroke="${RED}" stroke-width="${S}"/>
                 <path d="M92 76 L112 76 L118 46" stroke="${RED}" stroke-width="${S}" fill="none"/>
                 <circle cx="120" cy="42" r="6" fill="${GRAY}"/>
-                <path d="M104 66 L110 52" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
-                <path d="M104 58 L110 52 L115 59" stroke="${RED}" stroke-width="3" fill="none"/>
-            `),
-            inclinePress: wrap(`
-                <path d="M28 96 L70 58" stroke="${GRAY}" stroke-width="10" opacity="0.3"/>
-                <circle cx="32" cy="86" r="9" fill="${RED}"/>
-                <path d="M38 82 L74 66" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M62 70 L54 30" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M62 70 L86 30" stroke="${RED}" stroke-width="${S}"/>
-                <circle cx="52" cy="24" r="7" fill="${GRAY}"/>
-                <circle cx="88" cy="24" r="7" fill="${GRAY}"/>
-                <path d="M70 55 L70 38" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
-                <path d="M64 46 L70 38 L76 46" stroke="${RED}" stroke-width="3" fill="none"/>
-            `),
-            dip: wrap(`
-                <line x1="40" y1="20" x2="40" y2="96" stroke="${GRAY}" stroke-width="5" opacity="0.5"/>
-                <line x1="100" y1="20" x2="100" y2="96" stroke="${GRAY}" stroke-width="5" opacity="0.5"/>
-                <circle cx="70" cy="30" r="9" fill="${RED}"/>
-                <path d="M70 39 L70 74" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 74 L64 100 M70 74 L78 100" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 48 L40 60" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 48 L100 60" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 66 L70 84" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
-                <path d="M64 78 L70 85 L76 78" stroke="${RED}" stroke-width="3" fill="none"/>
-            `),
-            plank: wrap(`
-                <path d="M15 108 H145" stroke="${GRAY}" stroke-width="2" stroke-dasharray="4 5" opacity="0.5"/>
-                <circle cx="126" cy="84" r="9" fill="${RED}"/>
-                <path d="M118 88 L40 96" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 94 L70 108" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M100 90 L100 108" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M38 96 L20 98" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M50 40 H110" stroke="${RED}" stroke-width="2" stroke-dasharray="3 4" opacity="0.7"/>
-                <path d="M50 40 L58 35 M50 40 L58 45" stroke="${RED}" stroke-width="2" fill="none"/>
-                <path d="M110 40 L102 35 M110 40 L102 45" stroke="${RED}" stroke-width="2" fill="none"/>
-            `),
-            rdl: wrap(`
-                <circle cx="52" cy="22" r="9" fill="${RED}"/>
-                <path d="M52 31 L68 58" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M68 58 L64 92 L58 114" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M68 58 L78 92 L84 114" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M58 40 L84 78" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M80 78 L100 80" stroke="${GRAY}" stroke-width="4"/>
-                <path d="M40 70 L40 100" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
-                <path d="M34 92 L40 100 L46 92" stroke="${RED}" stroke-width="3" fill="none"/>
-            `),
-            hipThrust: wrap(`
-                <rect x="14" y="60" width="22" height="12" rx="3" fill="${GRAY}" opacity="0.35"/>
-                <path d="M100 76 H128" stroke="${GRAY}" stroke-width="4"/>
-                <circle cx="24" cy="64" r="9" fill="${RED}"/>
-                <path d="M28 72 L70 88" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 88 L100 78" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M100 78 L96 60" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M96 60 L112 60" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 68 L70 84" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
-                <path d="M64 78 L70 85 L76 78" stroke="${RED}" stroke-width="3" fill="none"/>
-            `),
-            abductor: wrap(`
-                <rect x="55" y="98" width="20" height="12" rx="3" fill="${GRAY}" opacity="0.35"/>
-                <circle cx="70" cy="28" r="9" fill="${RED}"/>
-                <path d="M70 37 L70 74" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 74 L44 92 L38 116" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 74 L96 92 L102 116" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M40 66 L40 88" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
-                <path d="M34 82 L40 89 L46 82" stroke="${RED}" stroke-width="3" fill="none" transform="rotate(-40 40 82)"/>
-                <path d="M100 66 L100 88" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
-            `),
-            gluteBridge: wrap(`
-                <path d="M12 100 H148" stroke="${GRAY}" stroke-width="2" stroke-dasharray="4 5" opacity="0.5"/>
-                <circle cx="24" cy="90" r="9" fill="${RED}"/>
-                <path d="M28 96 L64 82" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M64 82 L96 90" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M96 90 L92 70" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M92 70 L108 70" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M64 74 L64 60" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
-                <path d="M58 68 L64 61 L70 68" stroke="${RED}" stroke-width="3" fill="none"/>
-            `),
-            generic: wrap(`
-                <circle cx="70" cy="28" r="9" fill="${RED}"/>
-                <path d="M70 37 L70 90" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 90 L56 116 M70 90 L84 116" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 50 L48 68" stroke="${RED}" stroke-width="${S}"/>
-                <path d="M70 50 L92 68" stroke="${RED}" stroke-width="${S}"/>
-            `)
-        };
-
-        const scheduleData = {
-            Sat: {
-                dayLabel: "السبت",
-                type: "workout",
-                name: "يوم الدفع (Push)",
-                focus: "صدر - كتف - ترايسبس",
-                icon: "fa-hand-fist",
-                exercises: [
-                    { name: "20 دقيقة مشاية (إحماء)", sets: "20 دقيقة - سرعة معتدلة", cal: 180, fixed: true, icon: "treadmill",
-                      how: "امشِ بوتيرة معتدلة مع رفع بسيط للميل، حافظ على استقامة ظهرك ونفس منتظم. الهدف تسخين الجسم قبل التمرين." },
-                    { name: "جهاز ضغط الصدر (Chest Press Machine)", sets: "3 مجموعات × 12 تكرار", cal: 80, icon: "chestPress",
-                      how: "اجلس واجعل ظهرك ملاصقاً للمسند، امسك المقابض بمستوى الصدر وادفع للأمام ببطء دون قفل كامل للمرفق، ثم ارجع بتحكم." },
-                    { name: "جهاز ضغط الكتف (Shoulder Press Machine)", sets: "3 مجموعات × 10 تكرار", cal: 75, icon: "shoulderPress",
-                      how: "اضبط ارتفاع المقعد حتى يصل المقبض لمستوى كتفيك، ادفع للأعلى دون قفل كامل للمرفقين ثم أنزل ببطء وتحكم." },
-                    { name: "رفعات جانبية بالدمبل (Lateral Raise)", sets: "3 مجموعات × 12 تكرار", cal: 55, icon: "lateralRaise",
-                      how: "قف باستقامة والدمبلز بجانب جسمك، ارفعهما للجانبين حتى مستوى الكتف مع ثني بسيط بالمرفق، لا ترفع أعلى من الكتف." },
-                    { name: "ضغط ترايسبس كيبل (Triceps Pushdown)", sets: "3 مجموعات × 12 تكرار", cal: 60, icon: "tricepsPushdown",
-                      how: "قف أمام جهاز الكيبل، ثبت المرفقين بجانب جسمك وادفع الحبل للأسفل حتى استقامة الذراع، ثم ارجع ببطء." },
-                    { name: "تمرين الضغط على الركبة (Knee Push-up)", sets: "3 مجموعات × 8-10 تكرار", cal: 65, icon: "pushup",
-                      how: "ابدأ بوضعية بلانك على الركبتين واليدين، انزل جسمك ببطء حتى يقترب صدرك من الأرض ثم ادفع للأعلى مع شد البطن." }
-                ]
-            },
-            Sun: {
-                dayLabel: "الأحد",
-                type: "workout",
-                name: "يوم السحب (Pull)",
-                focus: "ظهر - باي سبس",
-                icon: "fa-arrows-down-to-line",
-                exercises: [
-                    { name: "20 دقيقة مشاية (إحماء)", sets: "20 دقيقة - سرعة معتدلة", cal: 180, fixed: true, icon: "treadmill",
-                      how: "امشِ بوتيرة معتدلة مع رفع بسيط للميل، حافظ على استقامة ظهرك ونفس منتظم. الهدف تسخين الجسم قبل التمرين." },
-                    { name: "سحب علوي بقبضة عريضة (Lat Pulldown)", sets: "3 مجموعات × 12 تكرار", cal: 85, icon: "latPulldown",
-                      how: "اجلس وثبّت ركبتيك تحت الوسادة، اسحب القضيب للأسفل حتى الصدر العلوي مع فتح صدرك للأمام، ثم ارجع ببطء للأعلى." },
-                    { name: "تجديف كيبل جالس (Seated Cable Row)", sets: "3 مجموعات × 12 تكرار", cal: 80, icon: "seatedRow",
-                      how: "اجلس مع ثني بسيط بالركبتين، اسحب المقبض تجاه بطنك مع شد لوحي الكتف للخلف، وحافظ على استقامة ظهرك." },
-                    { name: "سحب للوجه (Face Pull)", sets: "3 مجموعات × 15 تكرار", cal: 55, icon: "facePull",
-                      how: "اضبط الكيبل بارتفاع الوجه، اسحب الحبل تجاه وجهك مع فتح المرفقين للخارج، ركّز على عضلات الكتف الخلفية." },
-                    { name: "باي سبس بالدمبل (Dumbbell Curl)", sets: "3 مجموعات × 12 تكرار", cal: 60, icon: "curl",
-                      how: "قف باستقامة وثبّت مرفقيك بجانب جسمك، ارفع الدمبلز للأعلى دون تحريك الكتف، ثم أنزل ببطء." },
-                    { name: "تمرين المطرقة (Hammer Curl)", sets: "3 مجموعات × 12 تكرار", cal: 60, icon: "curl",
-                      how: "نفس حركة الباي سبس، لكن امسك الدمبل بشكل عمودي (كأنك تمسك مطرقة) طوال الحركة." }
-                ]
-            },
-            Mon: {
-                dayLabel: "الإثنين",
-                type: "workout",
-                name: "يوم الأرجل (Leg)",
-                focus: "كواد - سمانة - هامسترينج",
-                icon: "fa-person-running",
-                exercises: [
-                    { name: "20 دقيقة مشاية (إحماء)", sets: "20 دقيقة - سرعة معتدلة", cal: 180, fixed: true, icon: "treadmill",
-                      how: "امشِ بوتيرة معتدلة مع رفع بسيط للميل، حافظ على استقامة ظهرك ونفس منتظم. الهدف تسخين الجسم قبل التمرين." },
-                    { name: "جهاز ضغط الأرجل (Leg Press Machine)", sets: "3 مجموعات × 12 تكرار", cal: 110, icon: "legPress",
-                      how: "اجلس وضع قدميك بعرض الكتفين على المنصة، ادفع للأمام دون قفل كامل للركبتين، ثم ارجع ببطء وتحكم." },
-                    { name: "تمديد الأرجل (Leg Extension Machine)", sets: "3 مجموعات × 12 تكرار", cal: 70, icon: "legExtension",
-                      how: "اجلس واضبط الوسادة فوق الكاحل مباشرة، ارفع الأثقال للأمام حتى استقامة الساق تقريباً، ثم أنزل ببطء." },
-                    { name: "سكوات بدمبل أمام الصدر (Goblet Squat)", sets: "3 مجموعات × 10 تكرار", cal: 90, icon: "squat",
-                      how: "امسك دمبل بيدين أمام صدرك، انزل كأنك تجلس على كرسي مع إبقاء ظهرك مستقيم وركبتيك خلف أصابع قدميك." },
-                    { name: "رفعات السمانة (Calf Raise Machine)", sets: "3 مجموعات × 15 تكرار", cal: 55, icon: "calfRaise",
-                      how: "قف على الجهاز مع وضع مقدمة القدم على الحافة، ارفع كعبيك للأعلى قدر الإمكان، ثم انزل ببطء وتحكم." },
-                    { name: "جهاز الهامسترينج مستلقياً (Lying Leg Curl)", sets: "3 مجموعات × 12 تكرار", cal: 65, icon: "legCurl",
-                      how: "استلقِ على بطنك وضع الوسادة خلف الكاحلين، اثنِ ركبتيك لسحب الوزن للأعلى، ثم عد ببطء لوضع البداية." }
-                ]
-            },
-            Tue: {
-                dayLabel: "الثلاثاء",
-                type: "rest",
-                name: "يوم راحة",
-                focus: "استشفاء العضلات",
-                icon: "fa-bed"
-            },
-            Wed: {
-                dayLabel: "الأربعاء",
-                type: "workout",
-                name: "يوم الجزء العلوي (Upper)",
-                focus: "صدر - ظهر - كتف - ذراعين",
-                icon: "fa-up-long",
-                exercises: [
-                    { name: "20 دقيقة مشاية (إحماء)", sets: "20 دقيقة - سرعة معتدلة", cal: 180, fixed: true, icon: "treadmill",
-                      how: "امشِ بوتيرة معتدلة مع رفع بسيط للميل، حافظ على استقامة ظهرك ونفس منتظم. الهدف تسخين الجسم قبل التمرين." },
-                    { name: "ضغط دمبل بميل (Incline Dumbbell Press)", sets: "3 مجموعات × 12 تكرار", cal: 85, icon: "inclinePress",
-                      how: "استلقِ على مقعد مائل، امسك الدمبلز بمستوى الصدر وادفعهما للأعلى بزاوية، ثم أنزل ببطء وتحكم." },
-                    { name: "سحب علوي بقبضة ضيقة (Lat Pulldown - Narrow)", sets: "3 مجموعات × 12 تكرار", cal: 80, icon: "latPulldown",
-                      how: "امسك القضيب بقبضة ضيقة، اسحب للأسفل مع شد الكتفين للخلف والصدر للأمام، ثم ارجع ببطء." },
-                    { name: "ضغط كتف بالدمبل جالساً (Seated Dumbbell Shoulder Press)", sets: "3 مجموعات × 10 تكرار", cal: 75, icon: "shoulderPress",
-                      how: "اجلس باستقامة، ادفع الدمبلز للأعلى فوق الرأس دون قفل كامل بالمرفق، ثم أنزل ببطء لمستوى الكتف." },
-                    { name: "باي سبس بار EZ (EZ Bar Curl)", sets: "3 مجموعات × 12 تكرار", cal: 60, icon: "curl",
-                      how: "امسك البار بقبضة متوسطة، ثبّت مرفقيك بجانب جسمك وارفع البار للأعلى دون تحريك الكتف." },
-                    { name: "ترايسبس بجهاز الدفع المدعوم (Assisted Dip Machine)", sets: "3 مجموعات × 10 تكرار", cal: 70, icon: "dip",
-                      how: "اجلس على الجهاز وثبّت الوزن المساعد المناسب، ادفع جسمك للأعلى باستخدام ذراعيك مع الحفاظ على استقامة الجسم." },
-                    { name: "بلانك (Plank)", sets: "3 مجموعات × 20-30 ثانية", cal: 40, icon: "plank",
-                      how: "استلقِ على ساعديك وأطراف قدميك، حافظ على استقامة الجسم من الرأس للكعبين دون هبوط الحوض." }
-                ]
-            },
-            Thu: {
-                dayLabel: "الخميس",
-                type: "workout",
-                name: "يوم الجزء السفلي (Lower)",
-                focus: "مؤخرة - هامسترينج - سمانة",
-                icon: "fa-down-long",
-                exercises: [
-                    { name: "20 دقيقة مشاية (إحماء)", sets: "20 دقيقة - سرعة معتدلة", cal: 180, fixed: true, icon: "treadmill",
-                      how: "امشِ بوتيرة معتدلة مع رفع بسيط للميل، حافظ على استقامة ظهرك ونفس منتظم. الهدف تسخين الجسم قبل التمرين." },
-                    { name: "رفعة رومانية بالدمبل (Romanian Deadlift)", sets: "3 مجموعات × 10 تكرار", cal: 90, icon: "rdl",
-                      how: "امسك الدمبلز أمام فخذيك، انزل بالانحناء من الورك مع إبقاء ظهرك مستقيماً حتى تشعر بشد الهامسترينج، ثم عد للأعلى." },
-                    { name: "دفع الورك (Hip Thrust)", sets: "3 مجموعات × 12 تكرار", cal: 85, icon: "hipThrust",
-                      how: "استند بكتفيك على مقعد وقدماك على الأرض، ضع الوزن فوق حوضك وادفع للأعلى بشد عضلات المؤخرة، ثم انزل ببطء." },
-                    { name: "جهاز الهامسترينج جالساً (Seated Hamstring Curl)", sets: "3 مجموعات × 12 تكرار", cal: 65, icon: "legCurl",
-                      how: "اجلس واضبط الوسادة فوق الكاحل، اثنِ ركبتيك لسحب الوزن للأسفل والخلف، ثم ارجع ببطء لوضع البداية." },
-                    { name: "جهاز تباعد الفخذ (Hip Abductor Machine)", sets: "3 مجموعات × 15 تكرار", cal: 50, icon: "abductor",
-                      how: "اجلس وضع فخذيك داخل الوسادات، ادفعهما للخارج ببطء ثم عد للداخل بتحكم دون اندفاع." },
-                    { name: "رفعات السمانة وقوفاً (Standing Calf Raise)", sets: "3 مجموعات × 15 تكرار", cal: 55, icon: "calfRaise",
-                      how: "قف على حافة مرتفعة قليلاً بمقدمة قدميك، ارفع كعبيك للأعلى قدر الإمكان ثم انزل ببطء تحت مستوى القدم." },
-                    { name: "جسر المؤخرة (Glute Bridge)", sets: "3 مجموعات × 15 تكرار", cal: 45, icon: "gluteBridge",
-                      how: "استلقِ على ظهرك مع ثني الركبتين وقدميك على الأرض، ادفع حوضك للأعلى بشد عضلات المؤخرة، ثم انزل ببطء." }
-                ]
-            },
-            Fri: {
-                dayLabel: "الجمعة",
-                type: "rest",
-                name: "يوم راحة",
-                focus: "استشفاء العضلات",
-                icon: "fa-bed"
-            }
-        };
-
-        const dayOrder = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
-        const doneExercises = new Set();
-        let currentDay = 'Sat';
-
-        function renderTabs() {
-            const tabsContainer = document.getElementById('day-tabs');
-            tabsContainer.innerHTML = dayOrder.map(dayKey => {
-                const day = scheduleData[dayKey];
-                const isRest = day.type === 'rest';
-                const activeClass = dayKey === currentDay ? (isRest ? 'rest-tab' : 'active-tab') : 'text-slate-400 hover:text-white';
-                return `<button data-day="${dayKey}" onclick="switchDay('${dayKey}')"
-                    class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs ${activeClass} transition">
-                    ${day.dayLabel} ${isRest ? '<i class="fa-solid fa-bed"></i>' : ''}
-                </button>`;
-            }).join('');
-        }
-
-        function switchDay(dayKey) {
-            currentDay = dayKey;
-            renderTabs();
-
-            const day = scheduleData[dayKey];
-            const container = document.getElementById('schedule-container');
-
-            if (day.type === 'rest') {
-                container.innerHTML = `
-                <div class="col-span-full bg-slate-900 border border-slate-800 rounded-3xl p-10 text-center">
-                    <i class="fa-solid fa-bed text-red-500 text-4xl mb-4"></i>
-                    <h3 class="text-xl font-bold text-white mb-2">${day.dayLabel} - يوم راحة كامل</h3>
-                    <p class="text-slate-400 text-sm max-w-md mx-auto">
-                        لا تمارين اليوم. خذ قسطاً كافياً من النوم، اشرب كمية كافية من الماء، ويمكنك عمل تمدد خفيف (Stretching)
-                        لمدة 5-10 دقائق إذا رغبت. الراحة جزء أساسي من بناء العضلات.
-                    </p>
-                </div>`;
-                updateStats();
-                return;
-            }
-
-            container.innerHTML = day.exercises.map((ex, idx) => {
-                const key = `${dayKey}:${ex.name}`;
-                const isDone = doneExercises.has(key);
-                return `
-                <div class="bg-slate-900 border ${isDone ? 'border-green-500/50' : 'border-slate-800'} rounded-2xl overflow-hidden card-hover flex flex-col justify-between">
-                    <div>
-                        <div class="relative h-36 overflow-hidden bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center">
-                            ${ICONS[ex.icon] || ICONS.generic}
-                            ${ex.fixed ? '<span class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">أساسي يومياً</span>' : ''}
-                        </div>
-                        <div class="p-4">
-                            <h4 class="font-bold text-white text-base mb-1">${ex.name}</h4>
-                            <p class="text-xs text-red-400 font-semibold">${ex.sets}</p>
-                        </div>
-                        <div class="how-to px-4 py-3">
-                            <p class="text-[11px] font-bold text-slate-300 mb-1 flex items-center gap-1.5">
-                                <i class="fa-solid fa-circle-info text-red-500"></i> طريقة الأداء الصحيح
-                            </p>
-                            <p class="text-[11px] text-slate-400 leading-relaxed">${ex.how}</p>
-                        </div>
-                    </div>
-                    <div class="p-4 pt-3 flex justify-between items-center border-t border-slate-800/80 mt-2">
-                        <span class="text-xs text-slate-400 font-semibold">~${ex.cal} سعرة</span>
-                        <button onclick="toggleDone('${key.replace(/'/g, "\\'")}')" 
-                            class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${isDone ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-red-600 hover:text-white'}">
-                            <i class="fa-solid ${isDone ? 'fa-check' : 'fa-plus'}"></i>
-                            <span>${isDone ? 'مكتمل' : 'تم الإنجاز'}</span>
-                        </button>
-                    </div>
-                </div>`;
-            }).join('');
-
-            updateStats();
-        }
-
-        function toggleDone(key) {
-            if (doneExercises.has(key)) {
-                doneExercises.delete(key);
-                showToast('تم إلغاء التحديد');
-            } else {
-                doneExercises.add(key);
-                showToast('عاش! تم تجميع التمرين ✓');
-            }
-            switchDay(currentDay);
-            updateTracker();
-        }
-
-        function updateStats() {
-            let doneCount = 0;
-            let calories = 0;
-
-            doneExercises.forEach(key => {
-                const [dayKey, exName] = key.split(':');
-                const day = scheduleData[dayKey];
-                if (!day || day.type !== 'workout') return;
-                const ex = day.exercises.find(e => e.name === exName);
-                if (ex) {
-                    doneCount++;
-                    calories += ex.cal;
-                }
-            });
-
-            document.getElementById('stat-done').textContent = doneCount;
-            document.getElementById('stat-calories').textContent = calories;
-        }
-
-        function updateTracker() {
-            const list = document.getElementById('completed-list');
-            if (doneExercises.size === 0) {
-                list.innerHTML = `<p class="text-center text-xs text-slate-500 py-4">لم تقم بتحديد أي تمارين مكتملة اليوم بعد.</p>`;
-                return;
-            }
-
-            let html = '';
-            doneExercises.forEach(key => {
-                const [dayKey, exName] = key.split(':');
-                const day = scheduleData[dayKey];
-                if (!day || day.type !== 'workout') return;
-                const ex = day.exercises.find(e => e.name === exName);
-                if (ex) {
-                    html += `
-                    <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
-                        <span class="font-bold text-white"><i class="fa-solid fa-check text-green-500 ml-2"></i>${ex.name}</span>
-                        <span class="text-slate-400">${day.dayLabel} · ~${ex.cal} سعرة</span>
-                    </div>`;
-                }
-            });
-            list.innerHTML = html || `<p class="text-center text-xs text-slate-500 py-4">لم تقم بتحديد أي تمارين مكتملة اليوم بعد.</p>`;
-        }
-
-        function resetProgress() {
-            doneExercises.clear();
-            switchDay(currentDay);
-            updateTracker();
-            showToast('تمت إعادة ضبط التمارين المكتملة');
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.classList.add('show');
-            clearTimeout(window.toastTimer);
-            window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
-        }
-
-        // Init
-        renderTabs();
-        switchDay('Sat');
-        updateTracker();
-    </script>
-</body>
-</html>
+                <path d="M104 66 L110 52" stroke="${RED}" 
