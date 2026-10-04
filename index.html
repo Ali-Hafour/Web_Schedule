@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAA. — جدول التمرين الشخصي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; background: #020617; }
+        html { scroll-behavior: smooth; }
+        .active-tab { background: #ef4444 !important; color: #ffffff !important; box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25); }
+        .rest-tab { background: #1e293b !important; color: #94a3b8 !important; }
+        .card-hover { transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+        .card-hover:hover { transform: translateY(-5px); border-color: rgba(239, 68, 68, 0.45); box-shadow: 0 18px 45px rgba(0,0,0,0.3); }
+        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(14px); }
+        .toast { transform: translateY(20px); opacity: 0; pointer-events: none; transition: all 0.25s ease; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .how-to { background: rgba(239,68,68,0.06); border-top: 1px dashed rgba(239,68,68,0.25); }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen">
+
+    <!-- Header / Navbar -->
+    <nav class="sticky top-0 z-50 border-b border-slate-800/80 glass px-4 sm:px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#" class="flex items-center gap-2">
+                <span class="text-3xl font-black tracking-widest text-red-500">AAA</span>
+            </a>
+            <div class="flex gap-6 text-sm font-semibold text-slate-300">
+                <a href="#schedule" class="hover:text-red-400 transition">الجدول الأسبوعي</a>
+                <a href="#tracker" class="hover:text-red-400 transition">إنجاز اليوم</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative py-12 px-4 sm:px-6 bg-slate-900/50 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold uppercase mb-4">
+                جدول تمارين — Chest / Back / Shoulder / Arm / Leg
+            </div>
+           
+            
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10 space-y-12">
+
+        <!-- Progress Stats Banner -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                <i class="fa-solid fa-person-walking text-red-500 text-xl mb-2"></i>
+                <p class="text-2xl font-black">20 دقيقة</p>
+                <p class="text-xs text-slate-400">مشاية إحماء (كل يوم تدريب)</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                <i class="fa-solid fa-check-double text-red-500 text-xl mb-2"></i>
+                <p class="text-2xl font-black" id="stat-done">0</p>
+                <p class="text-xs text-slate-400">تمارين مكتملة اليوم</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                <i class="fa-solid fa-fire text-red-500 text-xl mb-2"></i>
+                <p class="text-2xl font-black" id="stat-calories">0</p>
+                <p class="text-xs text-slate-400">تقدير السعرات اليومية</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                <i class="fa-solid fa-bed text-red-500 text-xl mb-2"></i>
+                <p class="text-2xl font-black">راحة</p>
+                <p class="text-xs text-slate-400">الثلاثاء والجمعة</p>
+            </div>
+        </section>
+
+        <!-- Workout Schedule Days -->
+        <section id="schedule">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i class="fa-regular fa-calendar-days text-red-500"></i> اختار يوم الأسبوع
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">اضغط على اليوم لعرض تمارينه أو يوم الراحة</p>
+                </div>
+
+                <!-- Day Selector Tabs -->
+                <div class="flex flex-wrap gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800" id="day-tabs"></div>
+            </div>
+
+            <!-- Day progress -->
+            <div id="day-progress" class="mb-4 hidden">
+                <div class="flex justify-between text-xs text-slate-400 mb-1">
+                    <span id="day-progress-text"></span>
+                    <span id="day-progress-pct"></span>
+                </div>
+                <div class="h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="day-progress-bar" class="h-full bg-red-500 rounded-full transition-all duration-300" style="width:0%"></div>
+                </div>
+            </div>
+
+            <!-- Exercises Container -->
+            <div id="schedule-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- Tracker / Completion Section -->
+        <section id="tracker" class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-red-500"></i> التمارين المكتملة لليوم
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">اضغط على العلامة بجانب أي تمرين لإضافته هنا</p>
+                </div>
+                <button onclick="resetProgress()" class="text-xs bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white px-3 py-2 rounded-xl transition">
+                    إعادة ضبط اليوم
+                </button>
+            </div>
+
+            <div id="completed-list" class="space-y-3"></div>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-slate-800 bg-slate-950 py-6 text-center text-slate-500 text-xs">
+        <p>&copy; 2026 AAA Gym Schedule. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <!-- Rest Timer -->
+    <div id="rest-timer" class="fixed bottom-5 right-5 z-[110] glass border border-slate-700 rounded-2xl shadow-2xl">
+        <button onclick="toggleTimerPanel()" class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white">
+            <i class="fa-solid fa-stopwatch text-red-500"></i>
+            <span id="timer-display">مؤقت الراحة</span>
+        </button>
+        <div id="timer-panel" class="hidden px-3 pb-3 flex gap-2">
+            <button onclick="startTimer(60)" class="bg-slate-800 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">60ث</button>
+            <button onclick="startTimer(90)" class="bg-slate-800 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">90ث</button>
+            <button onclick="startTimer(120)" class="bg-slate-800 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">120ث</button>
+            <button onclick="stopTimer()" class="bg-slate-800 hover:bg-slate-600 text-slate-300 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast fixed bottom-5 left-5 z-[110] bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow-2xl"></div>
+
+    <script>
+        // Body-part split: Saturday=Chest, Sunday=Back, Monday=Shoulder, Tuesday=Rest, Wednesday=Arm, Thursday=Leg, Friday=Rest
+        // Self-contained exercise diagrams (start/finish posture) — no external images,
+        // so they always render, drawn to visually explain correct form for beginners.
+        const S = 5.5; // stroke width for the body
+        const RED = "#f87171";
+        const GRAY = "#64748b";
+        const wrap = (inner) => `
+            <svg viewBox="0 0 160 130" class="w-24 h-24 sm:w-28 sm:h-28" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                ${inner}
+            </svg>`;
+
+        const ICONS = {
+            treadmill: wrap(`
+                <rect x="18" y="104" width="110" height="14" rx="7" fill="${GRAY}" opacity="0.35"/>
+                <rect x="122" y="60" width="7" height="46" rx="3" fill="${GRAY}" opacity="0.55"/>
+                <circle cx="70" cy="34" r="9" fill="${RED}"/>
+                <path d="M70 43 L67 74" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M67 74 L52 88 L58 104" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M67 74 L84 84 L76 104" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M69 52 L56 66" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M69 52 L83 62" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M30 118 h90" stroke="${GRAY}" stroke-width="2" stroke-dasharray="4 5" opacity="0.5"/>
+            `),
+            chestPress: wrap(`
+                <rect x="34" y="92" width="46" height="12" rx="4" fill="${GRAY}" opacity="0.35"/>
+                <line x1="118" y1="20" x2="118" y2="110" stroke="${GRAY}" stroke-width="4" opacity="0.5"/>
+                <circle cx="52" cy="46" r="9" fill="${RED}"/>
+                <path d="M52 55 L52 92" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M52 92 L44 112 M52 92 L62 112" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M53 62 L100 55" stroke="${RED}" stroke-width="${S}"/>
+                <circle cx="103" cy="55" r="6" fill="${GRAY}"/>
+                <path d="M74 40 L96 40" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4" marker-end="url(#a)"/>
+                <path d="M92 34 L98 40 L92 46" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            shoulderPress: wrap(`
+                <rect x="55" y="98" width="20" height="14" rx="3" fill="${GRAY}" opacity="0.35"/>
+                <circle cx="70" cy="28" r="9" fill="${RED}"/>
+                <path d="M70 37 L70 98" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 98 L58 118 M70 98 L82 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 44 L48 14" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 44 L92 14" stroke="${RED}" stroke-width="${S}"/>
+                <circle cx="46" cy="10" r="7" fill="${GRAY}"/>
+                <circle cx="94" cy="10" r="7" fill="${GRAY}"/>
+                <path d="M70 90 L70 60" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M65 68 L70 58 L75 68" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            lateralRaise: wrap(`
+                <circle cx="70" cy="26" r="9" fill="${RED}"/>
+                <path d="M70 35 L70 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 96 L58 118 M70 96 L82 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 46 L26 44" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 46 L114 44" stroke="${RED}" stroke-width="${S}"/>
+                <circle cx="22" cy="44" r="7" fill="${GRAY}"/>
+                <circle cx="118" cy="44" r="7" fill="${GRAY}"/>
+                <path d="M28 78 Q10 55 22 46" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4" fill="none"/>
+                <path d="M17 52 L22 44 L28 51" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            tricepsPushdown: wrap(`
+                <line x1="102" y1="10" x2="102" y2="88" stroke="${GRAY}" stroke-width="4" opacity="0.5"/>
+                <circle cx="102" cy="8" r="6" fill="${GRAY}"/>
+                <circle cx="64" cy="26" r="9" fill="${RED}"/>
+                <path d="M64 35 L64 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M64 96 L52 118 M64 96 L76 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M66 44 L92 52 L92 82" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M80 84 L104 84" stroke="${GRAY}" stroke-width="4"/>
+                <path d="M92 60 L92 76" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M86 71 L92 78 L98 71" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            pushup: wrap(`
+                <path d="M15 100 H145" stroke="${GRAY}" stroke-width="2" stroke-dasharray="4 5" opacity="0.5"/>
+                <circle cx="122" cy="80" r="9" fill="${RED}"/>
+                <path d="M114 84 L60 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M85 92 L85 100" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M58 96 L36 98" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M45 97 L38 100" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M85 70 L85 88" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M79 82 L85 89 L91 82" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            latPulldown: wrap(`
+                <path d="M40 16 H120" stroke="${GRAY}" stroke-width="4"/>
+                <line x1="80" y1="8" x2="80" y2="16" stroke="${GRAY}" stroke-width="3"/>
+                <rect x="58" y="96" width="24" height="12" rx="3" fill="${GRAY}" opacity="0.35"/>
+                <circle cx="70" cy="40" r="9" fill="${RED}"/>
+                <path d="M70 49 L70 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 96 L60 118 M70 96 L80 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 54 L42 20" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 54 L98 20" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 66 L70 84" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M64 78 L70 85 L76 78" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            seatedRow: wrap(`
+                <rect x="20" y="100" width="20" height="12" rx="3" fill="${GRAY}" opacity="0.35"/>
+                <line x1="130" y1="56" x2="150" y2="56" stroke="${GRAY}" stroke-width="4" opacity="0.5"/>
+                <circle cx="42" cy="40" r="9" fill="${RED}"/>
+                <path d="M40 49 L36 92" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M36 92 L24 112 M36 92 L48 112" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M42 56 L112 60" stroke="${RED}" stroke-width="${S}"/>
+                <circle cx="115" cy="60" r="6" fill="${GRAY}"/>
+                <path d="M96 46 L74 52" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M80 46 L74 52 L81 58" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            facePull: wrap(`
+                <circle cx="120" cy="24" r="6" fill="${GRAY}" opacity="0.6"/>
+                <line x1="120" y1="30" x2="90" y2="46" stroke="${GRAY}" stroke-width="3" opacity="0.5"/>
+                <circle cx="70" cy="26" r="9" fill="${RED}"/>
+                <path d="M70 35 L70 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 96 L58 118 M70 96 L82 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 44 L38 42 L58 28" stroke="${RED}" stroke-width="${S}" fill="none"/>
+                <path d="M70 44 L98 42 L82 28" stroke="${RED}" stroke-width="${S}" fill="none"/>
+                <path d="M100 40 L82 34" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M90 30 L82 34 L88 40" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            curl: wrap(`
+                <circle cx="66" cy="26" r="9" fill="${RED}"/>
+                <path d="M66 35 L66 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M66 96 L54 118 M66 96 L78 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M66 46 L84 70" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M84 70 L64 52" stroke="${RED}" stroke-width="${S}"/>
+                <circle cx="60" cy="48" r="7" fill="${GRAY}"/>
+                <path d="M90 62 Q98 50 92 42" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4" fill="none"/>
+                <path d="M85 46 L92 42 L94 50" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            legPress: wrap(`
+                <path d="M20 40 L60 94" stroke="${GRAY}" stroke-width="10" opacity="0.3"/>
+                <line x1="118" y1="34" x2="118" y2="104" stroke="${GRAY}" stroke-width="5" opacity="0.55"/>
+                <circle cx="30" cy="58" r="9" fill="${RED}"/>
+                <path d="M36 64 L58 88" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M58 88 L92 76" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M92 76 L118 68" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M100 46 L118 46" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M112 41 L119 46 L112 51" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            legExtension: wrap(`
+                <rect x="45" y="18" width="14" height="70" rx="4" fill="${GRAY}" opacity="0.3"/>
+                <circle cx="52" cy="34" r="9" fill="${RED}"/>
+                <path d="M52 43 L52 82" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M52 82 L52 100 L96 92" stroke="${RED}" stroke-width="${S}" fill="none"/>
+                <circle cx="98" cy="92" r="6" fill="${GRAY}"/>
+                <path d="M70 70 L52 82 L70 100" stroke="${GRAY}" stroke-width="2" stroke-dasharray="3 4" fill="none" opacity="0.6"/>
+                <path d="M62 85 L78 90" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M72 85 L79 89 L74 95" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            squat: wrap(`
+                <circle cx="70" cy="22" r="9" fill="${RED}"/>
+                <path d="M70 31 L70 66" stroke="${RED}" stroke-width="${S}"/>
+                <ellipse cx="70" cy="50" rx="10" ry="6" fill="${GRAY}"/>
+                <path d="M70 66 L52 88 L48 114" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 66 L88 88 L92 114" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M32 60 L32 100" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M26 92 L32 100 L38 92" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            calfRaise: wrap(`
+                <path d="M30 112 H120" stroke="${GRAY}" stroke-width="2" stroke-dasharray="4 5" opacity="0.5"/>
+                <circle cx="70" cy="26" r="9" fill="${RED}"/>
+                <path d="M70 35 L70 88" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 88 L66 108 L78 112" stroke="${RED}" stroke-width="${S}" fill="none"/>
+                <path d="M70 62 L70 40" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M64 48 L70 40 L76 48" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            legCurl: wrap(`
+                <rect x="18" y="72" width="80" height="12" rx="4" fill="${GRAY}" opacity="0.3"/>
+                <circle cx="26" cy="60" r="9" fill="${RED}"/>
+                <path d="M32 66 L92 76" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M92 76 L112 76 L118 46" stroke="${RED}" stroke-width="${S}" fill="none"/>
+                <circle cx="120" cy="42" r="6" fill="${GRAY}"/>
+                <path d="M104 66 L110 52" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M104 58 L110 52 L115 59" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            inclinePress: wrap(`
+                <path d="M28 96 L70 58" stroke="${GRAY}" stroke-width="10" opacity="0.3"/>
+                <circle cx="32" cy="86" r="9" fill="${RED}"/>
+                <path d="M38 82 L74 66" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M62 70 L54 30" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M62 70 L86 30" stroke="${RED}" stroke-width="${S}"/>
+                <circle cx="52" cy="24" r="7" fill="${GRAY}"/>
+                <circle cx="88" cy="24" r="7" fill="${GRAY}"/>
+                <path d="M70 55 L70 38" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M64 46 L70 38 L76 46" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            dip: wrap(`
+                <line x1="40" y1="20" x2="40" y2="96" stroke="${GRAY}" stroke-width="5" opacity="0.5"/>
+                <line x1="100" y1="20" x2="100" y2="96" stroke="${GRAY}" stroke-width="5" opacity="0.5"/>
+                <circle cx="70" cy="30" r="9" fill="${RED}"/>
+                <path d="M70 39 L70 74" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 74 L64 100 M70 74 L78 100" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 48 L40 60" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 48 L100 60" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 66 L70 84" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M64 78 L70 85 L76 78" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            plank: wrap(`
+                <path d="M15 108 H145" stroke="${GRAY}" stroke-width="2" stroke-dasharray="4 5" opacity="0.5"/>
+                <circle cx="126" cy="84" r="9" fill="${RED}"/>
+                <path d="M118 88 L40 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 94 L70 108" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M100 90 L100 108" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M38 96 L20 98" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M50 40 H110" stroke="${RED}" stroke-width="2" stroke-dasharray="3 4" opacity="0.7"/>
+                <path d="M50 40 L58 35 M50 40 L58 45" stroke="${RED}" stroke-width="2" fill="none"/>
+                <path d="M110 40 L102 35 M110 40 L102 45" stroke="${RED}" stroke-width="2" fill="none"/>
+            `),
+            rdl: wrap(`
+                <circle cx="52" cy="22" r="9" fill="${RED}"/>
+                <path d="M52 31 L68 58" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M68 58 L64 92 L58 114" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M68 58 L78 92 L84 114" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M58 40 L84 78" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M80 78 L100 80" stroke="${GRAY}" stroke-width="4"/>
+                <path d="M40 70 L40 100" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M34 92 L40 100 L46 92" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            hipThrust: wrap(`
+                <rect x="14" y="60" width="22" height="12" rx="3" fill="${GRAY}" opacity="0.35"/>
+                <path d="M100 76 H128" stroke="${GRAY}" stroke-width="4"/>
+                <circle cx="24" cy="64" r="9" fill="${RED}"/>
+                <path d="M28 72 L70 88" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 88 L100 78" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M100 78 L96 60" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M96 60 L112 60" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 68 L70 84" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M64 78 L70 85 L76 78" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            abductor: wrap(`
+                <rect x="55" y="98" width="20" height="12" rx="3" fill="${GRAY}" opacity="0.35"/>
+                <circle cx="70" cy="28" r="9" fill="${RED}"/>
+                <path d="M70 37 L70 74" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 74 L44 92 L38 116" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 74 L96 92 L102 116" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M40 66 L40 88" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M34 82 L40 89 L46 82" stroke="${RED}" stroke-width="3" fill="none" transform="rotate(-40 40 82)"/>
+                <path d="M100 66 L100 88" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+            `),
+            gluteBridge: wrap(`
+                <path d="M12 100 H148" stroke="${GRAY}" stroke-width="2" stroke-dasharray="4 5" opacity="0.5"/>
+                <circle cx="24" cy="90" r="9" fill="${RED}"/>
+                <path d="M28 96 L64 82" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M64 82 L96 90" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M96 90 L92 70" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M92 70 L108 70" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M64 74 L64 60" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M58 68 L64 61 L70 68" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+
+            inclineFly: wrap(`
+                <path d="M30 108 L84 70" stroke="${GRAY}" stroke-width="8" opacity="0.35"/>
+                <circle cx="44" cy="82" r="9" fill="${RED}"/>
+                <path d="M52 88 L88 96 L112 112" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M56 88 L40 56" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M56 88 L72 52" stroke="${RED}" stroke-width="${S}"/>
+                <circle cx="38" cy="52" r="6" fill="${GRAY}"/>
+                <circle cx="74" cy="48" r="6" fill="${GRAY}"/>
+                <path d="M30 70 Q22 56 34 46" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4" fill="none"/>
+            `),
+            declineCableFly: wrap(`
+                <line x1="24" y1="10" x2="24" y2="40" stroke="${GRAY}" stroke-width="4" opacity="0.5"/>
+                <line x1="136" y1="10" x2="136" y2="40" stroke="${GRAY}" stroke-width="4" opacity="0.5"/>
+                <circle cx="80" cy="28" r="9" fill="${RED}"/>
+                <path d="M80 37 L80 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M80 96 L68 118 M80 96 L92 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M80 48 L50 52 L64 76" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M80 48 L110 52 L96 76" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M24 40 L50 52 M136 40 L110 52" stroke="${GRAY}" stroke-width="2"/>
+                <path d="M64 92 L80 78 L96 92" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4" fill="none"/>
+            `),
+            tBarRow: wrap(`
+                <path d="M20 112 L132 112" stroke="${GRAY}" stroke-width="3" opacity="0.5"/>
+                <path d="M138 108 L84 82" stroke="${GRAY}" stroke-width="4"/>
+                <circle cx="138" cy="108" r="8" fill="${GRAY}"/>
+                <circle cx="44" cy="52" r="9" fill="${RED}"/>
+                <path d="M52 58 L100 74" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M100 74 L88 94 L96 116" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M62 62 L74 80 L84 82" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M62 94 L62 80" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M56 86 L62 78 L68 86" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            pullover: wrap(`
+                <line x1="100" y1="8" x2="100" y2="40" stroke="${GRAY}" stroke-width="4" opacity="0.5"/>
+                <circle cx="100" cy="8" r="6" fill="${GRAY}"/>
+                <circle cx="64" cy="30" r="9" fill="${RED}"/>
+                <path d="M64 39 L64 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M64 96 L52 118 M64 96 L76 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M64 50 L84 36 L100 40" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M100 40 L72 40" stroke="${GRAY}" stroke-width="3" opacity="0.6"/>
+                <path d="M92 40 Q86 66 70 76" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4" fill="none"/>
+                <path d="M72 68 L68 78 L78 78" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            shrugs: wrap(`
+                <circle cx="70" cy="30" r="9" fill="${RED}"/>
+                <path d="M70 39 L70 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 96 L58 118 M70 96 L82 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 46 L48 62 L48 88" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 46 L92 62 L92 88" stroke="${RED}" stroke-width="${S}"/>
+                <circle cx="48" cy="94" r="7" fill="${GRAY}"/>
+                <circle cx="92" cy="94" r="7" fill="${GRAY}"/>
+                <path d="M30 60 L30 40" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M24 48 L30 38 L36 48" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            rearDelt: wrap(`
+                <rect x="96" y="40" width="14" height="60" rx="4" fill="${GRAY}" opacity="0.35"/>
+                <circle cx="88" cy="38" r="9" fill="${RED}"/>
+                <path d="M84 46 L62 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M62 96 L52 118 M62 96 L74 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M80 52 L40 56" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M80 52 L80 24" stroke="${RED}" stroke-width="${S}" opacity="0.5"/>
+                <circle cx="36" cy="56" r="6" fill="${GRAY}"/>
+                <path d="M60 70 L40 70" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M46 64 L38 70 L46 76" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            singleCableLateral: wrap(`
+                <line x1="132" y1="64" x2="132" y2="116" stroke="${GRAY}" stroke-width="4" opacity="0.5"/>
+                <circle cx="132" cy="112" r="6" fill="${GRAY}"/>
+                <circle cx="70" cy="26" r="9" fill="${RED}"/>
+                <path d="M70 35 L70 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 96 L58 118 M70 96 L82 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 46 L40 48" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 46 L88 84" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M88 84 L132 112" stroke="${GRAY}" stroke-width="2"/>
+                <path d="M96 84 Q104 56 94 46" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4" fill="none"/>
+            `),
+            overheadTri: wrap(`
+                <line x1="110" y1="60" x2="110" y2="116" stroke="${GRAY}" stroke-width="4" opacity="0.5"/>
+                <circle cx="62" cy="34" r="9" fill="${RED}"/>
+                <path d="M62 43 L62 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M62 96 L50 118 M62 96 L74 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M62 52 L74 28 L70 12" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M74 28 L110 70" stroke="${GRAY}" stroke-width="2"/>
+                <path d="M84 20 L84 8" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M78 14 L84 6 L90 14" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            preacher: wrap(`
+                <path d="M84 100 L108 60 L124 60" stroke="${GRAY}" stroke-width="7" opacity="0.4"/>
+                <circle cx="70" cy="32" r="9" fill="${RED}"/>
+                <path d="M70 41 L70 96" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 96 L58 118 M70 96 L82 118" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M72 50 L98 66 L92 38" stroke="${RED}" stroke-width="${S}"/>
+                <circle cx="91" cy="32" r="6" fill="${GRAY}"/>
+                <path d="M104 74 Q114 54 98 40" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4" fill="none"/>
+            `),
+            hackSquat: wrap(`
+                <path d="M30 112 L110 30" stroke="${GRAY}" stroke-width="6" opacity="0.4"/>
+                <circle cx="82" cy="46" r="9" fill="${RED}"/>
+                <path d="M78 54 L60 86" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M60 86 L84 98 L66 116" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M72 62 L84 70" stroke="${RED}" stroke-width="${S}"/>
+                <rect x="88" y="66" width="12" height="8" rx="2" fill="${GRAY}"/>
+                <path d="M104 100 L104 76" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M98 84 L104 74 L110 84" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            smithSquat: wrap(`
+                <line x1="40" y1="8" x2="40" y2="118" stroke="${GRAY}" stroke-width="4" opacity="0.5"/>
+                <line x1="120" y1="8" x2="120" y2="118" stroke="${GRAY}" stroke-width="4" opacity="0.5"/>
+                <path d="M40 48 H120" stroke="${GRAY}" stroke-width="5"/>
+                <circle cx="80" cy="38" r="9" fill="${RED}"/>
+                <path d="M80 47 L74 82" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M74 82 L98 94 L84 116" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M74 82 L64 98 L66 116" stroke="${RED}" stroke-width="${S}" opacity="0.6"/>
+                <path d="M136 100 L136 72" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M130 80 L136 70 L142 80" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            gluteKick: wrap(`
+                <rect x="24" y="40" width="14" height="60" rx="4" fill="${GRAY}" opacity="0.35"/>
+                <circle cx="52" cy="30" r="9" fill="${RED}"/>
+                <path d="M50 40 L56 84" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M56 84 L52 116" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M56 84 L104 96" stroke="${RED}" stroke-width="${S}"/>
+                <rect x="104" y="88" width="14" height="14" rx="3" fill="${GRAY}"/>
+                <path d="M66 112 L100 112" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M94 106 L102 112 L94 118" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            seatedCalf: wrap(`
+                <rect x="30" y="72" width="40" height="10" rx="3" fill="${GRAY}" opacity="0.35"/>
+                <circle cx="40" cy="30" r="9" fill="${RED}"/>
+                <path d="M40 39 L40 76" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M40 76 L94 70 L104 104" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M104 104 L124 108" stroke="${RED}" stroke-width="${S}"/>
+                <rect x="78" y="62" width="22" height="10" rx="3" fill="${GRAY}"/>
+                <path d="M112 96 L112 80" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+                <path d="M106 88 L112 78 L118 88" stroke="${RED}" stroke-width="3" fill="none"/>
+            `),
+            hipAdductor: wrap(`
+                <rect x="55" y="72" width="30" height="12" rx="3" fill="${GRAY}" opacity="0.35"/>
+                <circle cx="70" cy="26" r="9" fill="${RED}"/>
+                <path d="M70 35 L70 76" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 76 L40 92 L34 116" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 76 L100 92 L106 116" stroke="${RED}" stroke-width="${S}"/>
+                <rect x="38" y="84" width="8" height="18" rx="3" fill="${GRAY}"/>
+                <rect x="94" y="84" width="8" height="18" rx="3" fill="${GRAY}"/>
+                <path d="M24 98 L36 98 M104 98 L116 98" stroke="${RED}" stroke-width="3" stroke-dasharray="3 4"/>
+            `),
+            generic: wrap(`
+                <circle cx="70" cy="28" r="9" fill="${RED}"/>
+                <path d="M70 37 L70 90" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 90 L56 116 M70 90 L84 116" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 50 L48 68" stroke="${RED}" stroke-width="${S}"/>
+                <path d="M70 50 L92 68" stroke="${RED}" stroke-width="${S}"/>
+            `)
+        };
+
+        const scheduleData = {
+            Sat: {
+                dayLabel: "السبت",
+                type: "workout",
+                name: "يوم الصدر (Chest)",
+                focus: "صدر",
+                icon: "fa-hand-fist",
+                exercises: [
+                    { name: "20 دقيقة مشاية (إحماء)", sets: "20 دقيقة - سرعة معتدلة", cal: 180, fixed: true, icon: "treadmill",
+                      how: "امشِ بوتيرة معتدلة مع رفع بسيط للميل، حافظ على استقامة ظهرك ونفس منتظم. الهدف تسخين الجسم قبل التمرين." },
+                    { name: "Incline Chest Press (ضغط صدر علوي بالجهاز)", sets: "3 مجموعات × 12 تكرار", cal: 85, icon: "inclinePress",
+                      how: "اجلس وظهرك ملاصق للمسند، امسك المقابض بمستوى أعلى الصدر، ادفع للأمام والأعلى دون قفل المرفقين، ثم ارجع ببطء وتحكم." },
+                    { name: "Incline Dumbbell Press (ضغط دمبل علوي)", sets: "3 مجموعات × 10 تكرار", cal: 90, icon: "inclinePress",
+                      how: "استلقِ على مقعد مائل (30-45 درجة)، ادفع الدمبلز للأعلى حتى يقتربا فوق الصدر العلوي، ثم أنزلهما ببطء حتى مستوى الصدر." },
+                    { name: "Incline Dumbbell Fly (فتح دمبل علوي)", sets: "3 مجموعات × 12 تكرار", cal: 65, icon: "inclineFly",
+                      how: "استلقِ على مقعد مائل والدمبلز فوق صدرك، افتح الذراعين للجانبين بقوس واسع مع ثني بسيط بالمرفق حتى تشعر بتمدد الصدر، ثم اجمعهما للأعلى." },
+                    { name: "Seated Chest Press (ضغط صدر جالساً)", sets: "3 مجموعات × 12 تكرار", cal: 80, icon: "chestPress",
+                      how: "اضبط المقعد ليكون المقبض بمستوى منتصف الصدر، ادفع للأمام مع إبقاء الكتفين للخلف، ثم ارجع ببطء دون ترك الوزن يسقط." },
+                    { name: "Decline Cable Fly (فتح كيبل سفلي)", sets: "3 مجموعات × 12 تكرار", cal: 65, icon: "declineCableFly",
+                      how: "ابدأ بالكيبل من الأعلى، اسحب الذراعين للأسفل وللأمام في قوس واسع حتى يلتقي المقبضان أمام أسفل الصدر مع ثني بسيط بالمرفق، ثم ارجع ببطء." }
+                ]
+            },
+            Sun: {
+                dayLabel: "الأحد",
+                type: "workout",
+                name: "يوم الظهر (Back)",
+                focus: "ظهر - ترابيس",
+                icon: "fa-arrows-down-to-line",
+                exercises: [
+                    { name: "20 دقيقة مشاية (إحماء)", sets: "20 دقيقة - سرعة معتدلة", cal: 180, fixed: true, icon: "treadmill",
+                      how: "امشِ بوتيرة معتدلة مع رفع بسيط للميل، حافظ على استقامة ظهرك ونفس منتظم. الهدف تسخين الجسم قبل التمرين." },
+                    { name: "Lat Pulldown Vertical - Narrow (سحب علوي ضيق)", sets: "3 مجموعات × 12 تكرار", cal: 80, icon: "latPulldown",
+                      how: "امسك المقبض الضيق، اسحب للأسفل حتى أعلى الصدر مع شد الكتفين للخلف وإبقاء الصدر للأمام، ثم ارجع ببطء حتى استقامة الذراعين." },
+                    { name: "Lat Pulldown Vertical - Wide (سحب علوي واسع)", sets: "3 مجموعات × 12 تكرار", cal: 85, icon: "latPulldown",
+                      how: "امسك القضيب بقبضة أوسع من الكتفين، اسحب للأسفل نحو أعلى الصدر وكأنك تضع مرفقيك في جيبك الخلفي، ثم ارجع ببطء." },
+                    { name: "Seated Horizontal - Narrow (سحب أفقي ضيق)", sets: "3 مجموعات × 12 تكرار", cal: 80, icon: "seatedRow",
+                      how: "اجلس باستقامة، اسحب المقبض الضيق تجاه بطنك مع إبقاء المرفقين قريبين من الجسم وشد لوحي الكتف، ثم ارجع بتحكم." },
+                    { name: "Seated Horizontal - Wide (سحب أفقي واسع)", sets: "3 مجموعات × 12 تكرار", cal: 80, icon: "seatedRow",
+                      how: "امسك المقبض العريض، اسحب تجاه أعلى بطنك مع فتح المرفقين للجانبين وشد لوحي الكتف، ثم ارجع ببطء." },
+                    { name: "T-Bar Row (تجديف تي بار)", sets: "3 مجموعات × 10 تكرار", cal: 95, icon: "tBarRow",
+                      how: "انحنِ من الورك مع ظهر مستقيم، اسحب المقبض نحو أسفل صدرك مع شد لوحي الكتف، توقف لحظة ثم أنزل الوزن ببطء." },
+                    { name: "Pull Over Cable (بول أوفر كيبل)", sets: "3 مجموعات × 12 تكرار", cal: 70, icon: "pullover",
+                      how: "من وضع الكيبل العلوي وذراعين شبه مستقيمين، اسحب القضيب لأسفل نحو فخذيك بحركة قوس مع شد عضلات الظهر، ثم ارجع ببطء." },
+                    { name: "Dumbbell Shrugs (رفع أكتاف بالدمبل)", sets: "3 مجموعات × 12 تكرار", cal: 55, icon: "shrugs",
+                      how: "قف باستقامة والدمبلز بجانبك، ارفع كتفيك نحو أذنيك قدر الإمكان، اثبت لحظة ثم أنزل ببطء دون تدوير الكتفين." }
+                ]
+            },
+            Mon: {
+                dayLabel: "الإثنين",
+                type: "workout",
+                name: "يوم الكتف (Shoulder)",
+                focus: "كتف أمامي - جانبي - خلفي",
+                icon: "fa-up-long",
+                exercises: [
+                    { name: "20 دقيقة مشاية (إحماء)", sets: "20 دقيقة - سرعة معتدلة", cal: 180, fixed: true, icon: "treadmill",
+                      how: "امشِ بوتيرة معتدلة مع رفع بسيط للميل، حافظ على استقامة ظهرك ونفس منتظم. الهدف تسخين الجسم قبل التمرين." },
+                    { name: "Seated Shoulder Press (ضغط كتف جالساً)", sets: "3 مجموعات × 10 تكرار", cal: 75, icon: "shoulderPress",
+                      how: "اجلس باستقامة وظهرك على المسند، ادفع المقابض للأعلى فوق رأسك دون قفل كامل للمرفقين، ثم أنزل ببطء لمستوى الكتف." },
+                    { name: "Lateral Raises (رفعات جانبية)", sets: "3 مجموعات × 12 تكرار", cal: 55, icon: "lateralRaise",
+                      how: "قف باستقامة والدمبلز بجانب جسمك، ارفعهما للجانبين حتى مستوى الكتف مع ثني بسيط بالمرفق، لا ترفع أعلى من الكتف ولا تتأرجح بالجسم." },
+                    { name: "Single Cable Lateral Raises (رفعات جانبية كيبل لذراع)", sets: "3 مجموعات × 12 تكرار", cal: 55, icon: "singleCableLateral",
+                      how: "قف بجانب الكيبل وامسك المقبض بالذراع البعيدة، ارفع للجانب حتى مستوى الكتف بحركة بطيئة ثم أنزل بتحكم، وكرر للذراع الأخرى." },
+                    { name: "Rear Deltoid (كتف خلفي)", sets: "3 مجموعات × 15 تكرار", cal: 50, icon: "rearDelt",
+                      how: "اجلس على الجهاز بصدر ملاصق للوسادة، اسحب الذراعين للخلف وللجانبين حتى مستوى الكتف مع تركيز على الكتف الخلفي، ثم ارجع ببطء." },
+                    { name: "Cable Face Pull (سحب للوجه)", sets: "3 مجموعات × 15 تكرار", cal: 55, icon: "facePull",
+                      how: "اضبط الكيبل بمستوى الوجه، اسحب الحبل تجاه وجهك مع فتح المرفقين للخارج وشد الكتف الخلفي، ثم ارجع ببطء." }
+                ]
+            },
+            Tue: {
+                dayLabel: "الثلاثاء",
+                type: "rest",
+                name: "يوم راحة",
+                focus: "استشفاء العضلات",
+                icon: "fa-bed"
+            },
+            Wed: {
+                dayLabel: "الأربعاء",
+                type: "workout",
+                name: "يوم الذراعين (Arm)",
+                focus: "باي سبس - ترايسبس",
+                icon: "fa-dumbbell",
+                exercises: [
+                    { name: "20 دقيقة مشاية (إحماء)", sets: "20 دقيقة - سرعة معتدلة", cal: 180, fixed: true, icon: "treadmill",
+                      how: "امشِ بوتيرة معتدلة مع رفع بسيط للميل، حافظ على استقامة ظهرك ونفس منتظم. الهدف تسخين الجسم قبل التمرين." },
+                    { name: "Dumbbell Curl (باي سبس بالدمبل)", sets: "3 مجموعات × 12 تكرار", cal: 60, icon: "curl",
+                      how: "قف باستقامة وثبّت مرفقيك بجانب جسمك، ارفع الدمبلز للأعلى دون تحريك الكتف، اضغط العضلة في الأعلى ثم أنزل ببطء." },
+                    { name: "Dumbbell Curl on Horse (باي سبس على الحصان)", sets: "3 مجموعات × 12 تكرار", cal: 60, icon: "preacher",
+                      how: "ضع ذراعك على وسادة المقعد المائل (الحصان) وامسك الدمبل، ارفعه للأعلى دون حركة في الكتف ثم أنزل ببطء حتى تمدد الذراع." },
+                    { name: "Hammer Curls (تمرين المطرقة)", sets: "3 مجموعات × 12 تكرار", cal: 60, icon: "curl",
+                      how: "نفس حركة الباي سبس لكن امسك الدمبل بشكل عمودي (كأنك تمسك مطرقة) طوال الحركة، وثبّت المرفقين بجانب جسمك." },
+                    { name: "Rope Pushdown (ضغط ترايسبس بالحبل)", sets: "3 مجموعات × 12 تكرار", cal: 60, icon: "tricepsPushdown",
+                      how: "ثبّت مرفقيك بجانب جسمك، ادفع الحبل للأسفل حتى استقامة الذراع وافتح الحبل قليلاً للخارج في النهاية، ثم ارجع ببطء." },
+                    { name: "Bar Pushdown (ضغط ترايسبس بالبار)", sets: "3 مجموعات × 12 تكرار", cal: 60, icon: "tricepsPushdown",
+                      how: "امسك البار المستقيم على الكيبل، ثبّت المرفقين بجانب جسمك وادفع للأسفل حتى استقامة الذراعين، ثم ارجع ببطء." },
+                    { name: "Overhead Tri Extension (ترايسبس خلف الرأس)", sets: "3 مجموعات × 12 تكرار", cal: 60, icon: "overheadTri",
+                      how: "امسك الحبل أو الدمبل خلف رأسك مع ثبات المرفقين للأعلى، مدّ ذراعيك حتى الاستقامة ثم أنزل خلف الرأس ببطء." },
+                    { name: "Triceps Dips (ترايسبس ديبس)", sets: "3 مجموعات × 8-10 تكرار", cal: 70, icon: "dip",
+                      how: "امسك المقبضين وذراعاك مستقيمان، انزل ببطء بثني المرفقين خلف الجسم مع بقاء الجسم عمودياً، ثم ادفع للأعلى دون قفل كامل." }
+                ]
+            },
+            Thu: {
+                dayLabel: "الخميس",
+                type: "workout",
+                name: "يوم الأرجل (Leg)",
+                focus: "كل أجهزة الأرجل",
+                icon: "fa-person-running",
+                exercises: [
+                    { name: "20 دقيقة مشاية (إحماء)", sets: "20 دقيقة - سرعة معتدلة", cal: 180, fixed: true, icon: "treadmill",
+                      how: "امشِ بوتيرة معتدلة مع رفع بسيط للميل، حافظ على استقامة ظهرك ونفس منتظم. الهدف تسخين الجسم قبل التمرين." },
+                    { name: "Leg Press (ضغط الأرجل)", sets: "3 مجموعات × 12 تكرار", cal: 110, icon: "legPress",
+                      how: "اجلس وضع قدميك بعرض الكتفين على المنصة، ادفع للأمام دون قفل كامل للركبتين، ثم ارجع ببطء مع بقاء ظهرك ملاصقاً للمسند." },
+                    { name: "Hack Squat Machine (سكوات هاك)", sets: "3 مجموعات × 10 تكرار", cal: 105, icon: "hackSquat",
+                      how: "ضع ظهرك وكتفيك على المسند وقدميك على المنصة، انزل ببطء حتى تصبح فخذاك موازيتين للمنصة ثم ادفع بكعبيك للأعلى." },
+                    { name: "Smith Machine Squat (سكوات سميث)", sets: "3 مجموعات × 10 تكرار", cal: 100, icon: "smithSquat",
+                      how: "ضع البار على كتفيك الخلفيين وقدميك أمامك قليلاً، انزل كأنك تجلس على كرسي مع ظهر مستقيم ثم ادفع للأعلى." },
+                    { name: "Leg Extension (تمديد الأرجل)", sets: "3 مجموعات × 12 تكرار", cal: 70, icon: "legExtension",
+                      how: "اجلس واضبط الوسادة فوق الكاحل مباشرة، ارفع الوزن حتى استقامة الساق تقريباً، اضغط الفخذ الأمامي لحظة ثم أنزل ببطء." },
+                    { name: "Lying Leg Curl (هامسترينج مستلقياً)", sets: "3 مجموعات × 12 تكرار", cal: 65, icon: "legCurl",
+                      how: "استلقِ على بطنك وضع الوسادة خلف الكاحلين، اثنِ ركبتيك لسحب الوزن للأعلى ثم عد ببطء لوضع البداية." },
+                    { name: "Seated Leg Curl (هامسترينج جالساً)", sets: "3 مجموعات × 12 تكرار", cal: 65, icon: "legCurl",
+                      how: "اجلس واضبط الوسادة فوق الكاحل، اثنِ ركبتيك لسحب الوزن للأسفل والخلف، ثم ارجع ببطء لوضع البداية." },
+                    { name: "Hip Abductor (تباعد الفخذ)", sets: "3 مجموعات × 15 تكرار", cal: 50, icon: "abductor",
+                      how: "اجلس وضع الفخذين من الخارج على الوسادات، ادفعهما للخارج ببطء ثم عد للداخل بتحكم دون اندفاع." },
+                    { name: "Hip Adductor (تقريب الفخذ)", sets: "3 مجموعات × 15 تكرار", cal: 50, icon: "hipAdductor",
+                      how: "اجلس وضع الفخذين من الداخل على الوسادات، اضغطهما نحو بعض ببطء ثم افتحهما بتحكم دون ترك الوزن يرتطم." },
+                    { name: "Glute Kickback Machine (ركلة المؤخرة)", sets: "3 مجموعات × 12 تكرار", cal: 60, icon: "gluteKick",
+                      how: "ثبّت صدرك على الوسادة وضع قدمك على المنصة، ادفع للخلف بقوة بشد المؤخرة دون قوس في أسفل الظهر، ثم ارجع ببطء." },
+                    { name: "Hip Thrust Machine (دفع الورك)", sets: "3 مجموعات × 12 تكرار", cal: 85, icon: "hipThrust",
+                      how: "ظهرك العلوي على المسند وقدماك على الأرض، ادفع الحوض للأعلى بشد المؤخرة حتى يستقيم جسمك، ثم انزل ببطء." },
+                    { name: "Standing Calf Raise (سمانة وقوفاً)", sets: "3 مجموعات × 15 تكرار", cal: 55, icon: "calfRaise",
+                      how: "ضع مقدمة قدميك على الحافة، ارفع كعبيك للأعلى قدر الإمكان، اثبت لحظة ثم انزل ببطء لأسفل مستوى القدم." },
+                    { name: "Seated Calf Raise (سمانة جالساً)", sets: "3 مجموعات × 15 تكرار", cal: 50, icon: "seatedCalf",
+                      how: "اجلس وضع الوسادة فوق ركبتيك ومقدمة القدم على المنصة، ارفع كعبيك بقوة ثم انزل ببطء لتمدد كامل." }
+                ]
+            },
+            Fri: {
+                dayLabel: "الجمعة",
+                type: "rest",
+                name: "يوم راحة",
+                focus: "استشفاء العضلات",
+                icon: "fa-bed"
+            }
+        };
+
+        const dayOrder = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+        // Saved on this device (localStorage) so progress and weights survive refresh
+        const store = {
+            get(k, fallback) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; } },
+            set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+        };
+        const doneExercises = new Set(store.get('aaa_done', []));
+        const weights = store.get('aaa_weights', {});
+        function saveDone() { store.set('aaa_done', [...doneExercises]); }
+        function saveWeight(el) {
+            const key = el.dataset.wkey;
+            if (el.value === '') delete weights[key]; else weights[key] = el.value;
+            store.set('aaa_weights', weights);
+            showToast('تم حفظ الوزن');
+        }
+        let currentDay = 'Sat';
+
+        function renderTabs() {
+            const tabsContainer = document.getElementById('day-tabs');
+            tabsContainer.innerHTML = dayOrder.map(dayKey => {
+                const day = scheduleData[dayKey];
+                const isRest = day.type === 'rest';
+                const activeClass = dayKey === currentDay ? (isRest ? 'rest-tab' : 'active-tab') : 'text-slate-400 hover:text-white';
+                return `<button data-day="${dayKey}" onclick="switchDay('${dayKey}')"
+                    class="tab-btn px-3 py-1.5 rounded-lg font-bold text-xs ${activeClass} transition">
+                    ${day.dayLabel} ${isRest ? '<i class="fa-solid fa-bed"></i>' : ''}
+                </button>`;
+            }).join('');
+        }
+
+        function switchDay(dayKey) {
+            currentDay = dayKey;
+            renderTabs();
+
+            const day = scheduleData[dayKey];
+            const container = document.getElementById('schedule-container');
+
+            if (day.type === 'rest') {
+                container.innerHTML = `
+                <div class="col-span-full bg-slate-900 border border-slate-800 rounded-3xl p-10 text-center">
+                    <i class="fa-solid fa-bed text-red-500 text-4xl mb-4"></i>
+                    <h3 class="text-xl font-bold text-white mb-2">${day.dayLabel} - يوم راحة كامل</h3>
+                    <p class="text-slate-400 text-sm max-w-md mx-auto">
+                        لا تمارين اليوم. خذ قسطاً كافياً من النوم، اشرب كمية كافية من الماء، ويمكنك عمل تمدد خفيف (Stretching)
+                        لمدة 5-10 دقائق إذا رغبت. الراحة جزء أساسي من بناء العضلات.
+                    </p>
+                </div>`;
+                updateStats();
+                return;
+            }
+
+            container.innerHTML = day.exercises.map((ex, idx) => {
+                const key = `${dayKey}:${ex.name}`;
+                const isDone = doneExercises.has(key);
+                return `
+                <div class="bg-slate-900 border ${isDone ? 'border-green-500/50' : 'border-slate-800'} rounded-2xl overflow-hidden card-hover flex flex-col justify-between">
+                    <div>
+                        <div class="relative h-36 overflow-hidden bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center">
+                            ${ICONS[ex.icon] || ICONS.generic}
+                            ${ex.fixed ? '<span class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">أساسي يومياً</span>' : ''}
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-bold text-white text-base mb-1">${ex.name}</h4>
+                            <p class="text-xs text-red-400 font-semibold">${ex.sets}</p>
+                        </div>
+                        <div class="px-4 pt-3 flex items-center gap-2">
+                            <i class="fa-solid fa-weight-hanging text-red-500 text-xs"></i>
+                            <label class="text-[11px] text-slate-400 whitespace-nowrap">آخر وزن (كجم)</label>
+                            <input type="number" inputmode="decimal" min="0" step="0.5" data-wkey="${key}" value="${weights[key] ?? ''}" onchange="saveWeight(this)"
+                                class="w-full bg-slate-950 border border-slate-800 focus:border-red-500 outline-none rounded-lg px-2 py-1 text-xs text-white">
+                        </div>
+                        <div class="how-to px-4 py-3 mt-3">
+                            <p class="text-[11px] font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-info text-red-500"></i> طريقة الأداء الصحيح
+                            </p>
+                            <p class="text-[11px] text-slate-400 leading-relaxed">${ex.how}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-3 flex justify-between items-center border-t border-slate-800/80 mt-2">
+                        <span class="text-xs text-slate-400 font-semibold">~${ex.cal} سعرة</span>
+                        <button onclick="toggleDone('${key.replace(/'/g, "\\'")}')" 
+                            class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${isDone ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-red-600 hover:text-white'}">
+                            <i class="fa-solid ${isDone ? 'fa-check' : 'fa-plus'}"></i>
+                            <span>${isDone ? 'مكتمل' : 'تم الإنجاز'}</span>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            updateStats();
+        }
+
+        function toggleDone(key) {
+            if (doneExercises.has(key)) {
+                doneExercises.delete(key);
+                showToast('تم إلغاء التحديد');
+            } else {
+                doneExercises.add(key);
+                showToast('عاش! تم تجميع التمرين ✓');
+                startTimer(90);
+            }
+            saveDone();
+            switchDay(currentDay);
+            updateTracker();
+        }
+
+        function updateStats() {
+            let doneCount = 0;
+            let calories = 0;
+
+            doneExercises.forEach(key => {
+                const [dayKey, exName] = key.split(':');
+                const day = scheduleData[dayKey];
+                if (!day || day.type !== 'workout') return;
+                const ex = day.exercises.find(e => e.name === exName);
+                if (ex) {
+                    doneCount++;
+                    calories += ex.cal;
+                }
+            });
+
+            const prog = document.getElementById('day-progress');
+            const today = scheduleData[currentDay];
+            if (today && today.type === 'workout') {
+                const total = today.exercises.length;
+                const done = today.exercises.filter(e => doneExercises.has(`${currentDay}:${e.name}`)).length;
+                const pct = Math.round((done / total) * 100);
+                prog.classList.remove('hidden');
+                document.getElementById('day-progress-text').textContent = `${done} من ${total} تمارين · ${today.name}`;
+                document.getElementById('day-progress-pct').textContent = pct + '%';
+                document.getElementById('day-progress-bar').style.width = pct + '%';
+            } else {
+                prog.classList.add('hidden');
+            }
+
+            document.getElementById('stat-done').textContent = doneCount;
+            document.getElementById('stat-calories').textContent = calories;
+        }
+
+        function updateTracker() {
+            const list = document.getElementById('completed-list');
+            if (doneExercises.size === 0) {
+                list.innerHTML = `<p class="text-center text-xs text-slate-500 py-4">لم تقم بتحديد أي تمارين مكتملة اليوم بعد.</p>`;
+                return;
+            }
+
+            let html = '';
+            doneExercises.forEach(key => {
+                const [dayKey, exName] = key.split(':');
+                const day = scheduleData[dayKey];
+                if (!day || day.type !== 'workout') return;
+                const ex = day.exercises.find(e => e.name === exName);
+                if (ex) {
+                    html += `
+                    <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
+                        <span class="font-bold text-white"><i class="fa-solid fa-check text-green-500 ml-2"></i>${ex.name}</span>
+                        <span class="text-slate-400">${day.dayLabel} · ~${ex.cal} سعرة</span>
+                    </div>`;
+                }
+            });
+            list.innerHTML = html || `<p class="text-center text-xs text-slate-500 py-4">لم تقم بتحديد أي تمارين مكتملة اليوم بعد.</p>`;
+        }
+
+        function resetProgress() {
+            doneExercises.clear();
+            saveDone();
+            switchDay(currentDay);
+            updateTracker();
+            showToast('تمت إعادة ضبط التمارين المكتملة');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // Rest timer
+        let timerId = null, timerLeft = 0;
+        function toggleTimerPanel() { document.getElementById('timer-panel').classList.toggle('hidden'); }
+        function renderTimer() {
+            const m = Math.floor(timerLeft / 60), s = String(timerLeft % 60).padStart(2, '0');
+            document.getElementById('timer-display').textContent = timerId ? `راحة ${m}:${s}` : 'مؤقت الراحة';
+        }
+        function startTimer(sec) {
+            stopTimer(true);
+            timerLeft = sec;
+            timerId = setInterval(() => {
+                timerLeft--;
+                if (timerLeft <= 0) {
+                    stopTimer(true);
+                    showToast('انتهت الراحة — ابدأ المجموعة التالية 💪');
+                    try { navigator.vibrate && navigator.vibrate([300, 150, 300]); } catch (e) {}
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const o = ctx.createOscillator(); o.frequency.value = 880; o.connect(ctx.destination);
+                        o.start(); o.stop(ctx.currentTime + 0.4);
+                    } catch (e) {}
+                } else renderTimer();
+            }, 1000);
+            renderTimer();
+        }
+        function stopTimer(silent) {
+            clearInterval(timerId); timerId = null; timerLeft = 0; renderTimer();
+        }
+
+        // Init: open today's workout automatically
+        const todayKey = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()];
+        currentDay = todayKey;
+        renderTabs();
+        switchDay(currentDay);
+        updateTracker();
+    </script>
+</body>
+</html>
